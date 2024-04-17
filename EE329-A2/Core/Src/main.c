@@ -39,15 +39,16 @@ int main(void)
 
   while (1)
   {
-   // if (keypad_anykey())
-    //{
-    		int key = keypad_readkey();
+   if (keypad_anykey())
+    {
+    	  int key = keypad_readkey();
     		keypad_displaykey(key);
     		HAL_Delay(2000);
-    	//}
-    //else{
-    	//keypad_displaykey('0');
-   // }
+        
+    	}
+    else{
+    	keypad_displaykey('0');
+   }
   }
   /* USER CODE END 3 */
 }
