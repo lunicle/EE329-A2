@@ -19,39 +19,104 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "keypad.h"
-#include "stm32l4xx_hal.h"
+
+
+void keypad_displaykey(uint8_t number) {
+    GPIOC->ODR &= ~(LED1_Pin | LED2_Pin | LED3_Pin | LED4_Pin); // Clear all LED pins
+    // Set each LED pin according to the corresponding bit in the number
+    GPIOC->ODR |= (number & 0b0001) ? LED1_Pin : 0;
+    GPIOC->ODR |= (number & 0b0010) ? LED2_Pin : 0;
+    GPIOC->ODR |= (number & 0b0100) ? LED3_Pin : 0;
+    GPIOC->ODR |= (number & 0b1000) ? LED4_Pin : 0;
+}
+
+void delay1(uint32_t count) {
+   for (uint32_t i = 0; i < count; i++) {
+       __NOP(); // No operation instruction, used for software delay
+   }
+}
 
 void SystemClock_Config(void);
-void keypad_displaykey(uint8_t number){
-	GPIOC->ODR |= (number & 0x1) & LED1_Pin ;
-	GPIOC->ODR |= (number & 0x2) & LED2_Pin ;
-	GPIOC->ODR |= (number & 0x4) & LED3_Pin ;
-	GPIOC->ODR |= (number & 0x8) & LED4_Pin ;
 
+
+uint8_t intbinary(int number1){
+	switch (number1){
+	case 1:
+		return 0b0001;
+	case 2:
+		return 0b0010;
+	case 3:
+		return 0b0011;
+	case 4:
+		return 0b0100;
+	case 5:
+		return 0b0101;
+	case 6:
+		return 0b0110;
+	case 7:
+		return 0b0111;
+	case 8:
+		return 0b1000;
+	case 9:
+		return 0b1001;
+	case 10:
+		return 0b1010;
+	case 11:
+		return 0b1110;
+	case 12:
+		return 0b1100;
+
+	}
 }
+
 
 int main(void)
 {
-
-  keypad_init();
   HAL_Init();
-  SystemClock_Config();
 
-  while (1)
-  {
-   if (keypad_anykey())
-    {
-    	  int key = keypad_readkey();
-    		keypad_displaykey(key);
-    		HAL_Delay(2000);
-        
-    	}
-    else{
-    	keypad_displaykey('0');
-   }
-  }
-  /* USER CODE END 3 */
+  SystemClock_Config();
+  keypad_init();
+
+
+  while (1){
+//	  uint8_t key = keypad_readkey();
+//	  if (key == 1){
+//		  GPIOC->BSRR = LED1_Pin;
+//		  delay1(1000000);
+//		  GPIOC->BRR = LED1_Pin;
+//	  }
+//	  if (key == 2){
+//		  GPIOC->BSRR = LED2_Pin;
+//		  delay1(1000000);
+//		  GPIOC->BRR = LED2_Pin;
+//	  }
+//	  if (key == 3){
+//	  		  GPIOC->BSRR = LED3_Pin;
+//	  		  delay1(1000000);
+//	  		  GPIOC->BRR = LED3_Pin;
+//	  	  }
+//	  if (Keypad_IsAnyKeyPressed() == 1){
+//		  GPIOC->BSRR = LED1_Pin;
+//		  delay1(1000000);
+//		  GPIOC->BRR = LED1_Pin;
+//	  }
+//	  else{
+//		  GPIOC->BSRR = (LED2_Pin);
+//		  delay1(50000);
+//		  GPIOC->BRR = (LED2_Pin);
+//		  delay1(50000);
+//	  }
+	  if (Keypad_IsAnyKeyPressed() == 1)
+	      {
+	      		uint8_t key = Keypad_WhichKeyIsPressed();
+	      		keypad_displaykey(key);
+	      		delay1(200000);
+	      		keypad_displaykey(0);
+	      	}
+	    }
 }
+
+
 /**
   * @brief System Clock Configuration
   * @retval None
@@ -96,45 +161,8 @@ void SystemClock_Config(void)
   }
 }
 
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-//static void MX_GPIO_Init(void)
-//{
-//  GPIO_InitTypeDef GPIO_InitStruct = {0};
-///* USER CODE BEGIN MX_GPIO_Init_1 */
-///* USER CODE END MX_GPIO_Init_1 */
-//
-//  /* GPIO Ports Clock Enable */
-//  __HAL_RCC_GPIOC_CLK_ENABLE();
-//
-//  /*Configure GPIO pin Output Level */
-//  HAL_GPIO_WritePin(GPIOC, Row_1_Pin|Row_2_Pin|Row_3_Pin|Row_4_Pin
-//                          |LED1_Pin|LED2_Pin|LED3_Pin|LED4_Pin, GPIO_PIN_RESET);
-//
-//  /*Configure GPIO pins : Row_1_Pin Row_2_Pin Row_3_Pin Row_4_Pin
-//                           LED1_Pin LED2_Pin LED3_Pin LED4_Pin */
-//  GPIO_InitStruct.Pin = Row_1_Pin|Row_2_Pin|Row_3_Pin|Row_4_Pin
-//                          |LED1_Pin|LED2_Pin|LED3_Pin|LED4_Pin;
-//  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-//  GPIO_InitStruct.Pull = GPIO_NOPULL;
-//  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-//  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-//
-//  /*Configure GPIO pins : Col_1_Pin Col_2_Pin Col_3_Pin */
-//  GPIO_InitStruct.Pin = Col_1_Pin|Col_2_Pin|Col_3_Pin;
-//  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-//  GPIO_InitStruct.Pull = GPIO_PULLUP;
-//  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-//
-///* USER CODE BEGIN MX_GPIO_Init_2 */
-///* USER CODE END MX_GPIO_Init_2 */
-//}
-
 /* USER CODE BEGIN 4 */
-//
+
 /* USER CODE END 4 */
 
 /**
@@ -144,11 +172,11 @@ void SystemClock_Config(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-//  /* User can add his own implementation to report the HAL error return state */
-//  __disable_irq();
-//  while (1)
-//  {
-//  }
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
   /* USER CODE END Error_Handler_Debug */
 }
 
